@@ -211,28 +211,21 @@ function bindReplayModal() {
   modal?.addEventListener('click', (e)=>{ if(e.target===modal) hideReplayModal(); });
 }
 
-// NEW: wire up the standalone replay download button
+ // NEW: wire up the standalone replay download button
 function bindReplayDownload() {
   const btn = document.getElementById('replay-download');
   if (!btn) return;
   // start disabled until a replay is opened
   btn.disabled = true;
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', async () => {
     if (!currentReplayMeta || !currentReplayMeta.src) return;
     try {
-      const a = document.createElement('a');
-      a.href = currentReplayMeta.src;
-      const ts = new Date().toISOString().replace(/[:.]/g, '-');
-      const base = 'splashy_bear_replay';
-      const scorePart = typeof currentReplayMeta.score === 'number'
-        ? `_score-${currentReplayMeta.score}`
-        : '';
-      a.download = `${base}${scorePart}_${ts}.webm`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      const mod = await import('./replayPlayer.jsx');
+      if (typeof mod.requestReplayDownload === 'function') {
+        mod.requestReplayDownload();
+      }
     } catch (e) {
-      console.warn('Replay download failed:', e);
+      console.warn('Replay download trigger failed:', e);
     }
   });
 }
