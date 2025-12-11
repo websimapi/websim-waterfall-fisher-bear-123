@@ -211,6 +211,139 @@ function bindReplayModal() {
   modal?.addEventListener('click', (e)=>{ if(e.target===modal) hideReplayModal(); });
 }
 
+/**
+ * Derive a display name and avatar URL from the user metadata.
+ */
+function getReplayUserMeta(user) {
+  const username =
+    user?.username ||
+    user?.name ||
+    (typeof user === 'string' ? user : 'Player');
+
+  let rawAvatarUrl;
+  if (user?.avatar_url) {
+    rawAvatarUrl = user.avatar_url;
+  } else if (user?.username) {
+    rawAvatarUrl = `https://images.websim.com/avatar/${user.username}`;
+  } else if (typeof user === 'string') {
+    if (user.startsWith('http')) {
+      rawAvatarUrl = user;
+    } else {
+      const cleanUser = user.toLowerCase();
+      if (cleanUser === 'player' || cleanUser === 'you' || cleanUser === 'guest') {
+        rawAvatarUrl = `https://images.websim.com/avatar/default`;
+      } else {
+        rawAvatarUrl = `https://images.websim.com/avatar/${user}`;
+      }
+    }
+  } else {
+    rawAvatarUrl = `https://images.websim.com/avatar/default`;
+  }
+
+  // Use direct URL; CORS does not matter for HTML playback-only overlays.
+  const avatarUrl = rawAvatarUrl;
+  return { username, avatarUrl };
+}
+
+/**
+ * Generate a QR code for the current page URL using the qrcode library,
+ * with a fallback to the static qr_code.png asset.
+ */
+async function generateReplayQR(imgEl) {
+  if (!imgEl) return;
+  try {
+    const { default: QRCode } = await import('qrcode');
+    const url = window.location.href.split('?')[0];
+    const dataUrl = await QRCode.toDataURL(url, {
+      width: 256,
+      margin: 1,
+      color: { dark: '#000000', light: '#ffffff' },
+    });
+    imgEl.src = dataUrl;
+  } catch (e) {
+    console.warn('QR generation failed, falling back to static asset:', e);
+    imgEl.src = 'qr_code.png';
+  }
+}
+
+/**
+ * Render a native HTML5 video with overlays for username, score and QR.
+ * Layout is constrained to a vertical "short" style inside the replay card.
+ */
+function renderNativeReplay({ src, user, score }) {
+  const container = document.getElementById('replay-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const { username, avatarUrl } = getReplayUserMeta(user);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'replay-native';
+
+  const aspect = document.createElement('div');
+  aspect.className = 'replay-aspect';
+  wrap.appendChild(aspect);
+
+  const video = document.createElement('video');
+  video.id = 'replay-video';
+  video.src = src;
+  video.playsInline = true;
+  video.loop = true;
+  video.controls = true;
+  video.muted = false;
+  video.autoplay = true;
+  aspect.appendChild(video);
+
+  // Bottom-left: avatar + username + score
+  const bl = document.createElement('div');
+  bl.className = 'replay-overlay bl';
+
+  const avatar = document.createElement('img');
+  avatar.className = 'replay-avatar';
+  avatar.src = avatarUrl;
+  avatar.alt = `${username} avatar`;
+  bl.appendChild(avatar);
+
+  const metaBox = document.createElement('div');
+  metaBox.className = 'replay-meta';
+  const nameSpan = document.createElement('span');
+  nameSpan.className = 'replay-username';
+  nameSpan.textContent = username;
+  const scoreSpan = document.createElement('span');
+  scoreSpan.className = 'replay-score';
+  scoreSpan.textContent = `Score: ${score}`;
+  metaBox.appendChild(nameSpan);
+  metaBox.appendChild(scoreSpan);
+  bl.appendChild(metaBox);
+
+  aspect.appendChild(bl);
+
+  // Bottom-right: QR card
+  const br = document.createElement('div');
+  br.className = 'replay-overlay br';
+
+  const qrCard = document.createElement('div');
+  qrCard.className = 'replay-qr';
+
+  const qrImg = document.createElement('img');
+  qrImg.className = 'replay-qr-img';
+  qrImg.alt = 'Scan to play';
+  qrCard.appendChild(qrImg);
+
+  const qrLabel = document.createElement('span');
+  qrLabel.className = 'replay-qr-label';
+  qrLabel.textContent = 'Scan to play';
+  qrCard.appendChild(qrLabel);
+
+  br.appendChild(qrCard);
+  aspect.appendChild(br);
+
+  container.appendChild(wrap);
+
+  // Kick off QR generation
+  generateReplayQR(qrImg);
+}
+
  // NEW: wire up the standalone replay download button
 function bindReplayDownload() {
   const btn = document.getElementById('replay-download');
@@ -243,10 +376,9 @@ function showReplayModal({ src, user, score }) {
   if (dlBtn) {
     dlBtn.disabled = !src;
   }
-  
-  import('./replayPlayer.jsx').then(({ renderReplay }) => {
-    renderReplay('replay-container', { src, user, score });
-  }).catch(e => console.error('Failed to load replay player:', e));
+
+  // Render native HTML5 video with overlays instead of Remotion/React
+  renderNativeReplay({ src, user, score });
 }
 function hideReplayModal() {
   const modal = document.getElementById('replay-modal');
@@ -257,9 +389,11 @@ function hideReplayModal() {
   const dlBtn = document.getElementById('replay-download');
   if (dlBtn) dlBtn.disabled = true;
 
-  import('./replayPlayer.jsx').then(({ unmountReplay }) => {
-    unmountReplay();
-  }).catch(() => {});
+  // Stop playback and clear DOM
+  const container = document.getElementById('replay-container');
+  if (container) {
+    container.innerHTML = '';
+  }
 }
 window.addEventListener('DOMContentLoaded', () => {
   bindModal();
