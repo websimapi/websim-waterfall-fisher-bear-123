@@ -10,8 +10,27 @@ const ReplayComposition = ({ src, user, score, qrCode }) => {
     textShadow: "2px 2px 0px black",
     position: "absolute"
   };
-  const username = user?.username || user?.name || user || "Player";
-  const avatarUrl = user?.username ? `https://images.websim.com/avatar/${user.username}` : typeof user === "string" && user.startsWith("http") ? user : `https://images.websim.com/avatar/default`;
+  const username = user?.username || user?.name || (typeof user === "string" ? user : "Player");
+  let rawAvatarUrl;
+  if (user?.avatar_url) {
+    rawAvatarUrl = user.avatar_url;
+  } else if (user?.username) {
+    rawAvatarUrl = `https://images.websim.com/avatar/${user.username}`;
+  } else if (typeof user === "string") {
+    if (user.startsWith("http")) {
+      rawAvatarUrl = user;
+    } else {
+      const cleanUser = user.toLowerCase();
+      if (cleanUser === "player" || cleanUser === "you" || cleanUser === "guest") {
+        rawAvatarUrl = `https://images.websim.com/avatar/default`;
+      } else {
+        rawAvatarUrl = `https://images.websim.com/avatar/${user}`;
+      }
+    }
+  } else {
+    rawAvatarUrl = `https://images.websim.com/avatar/default`;
+  }
+  const avatarUrl = `https://corsproxy.io/?${encodeURIComponent(rawAvatarUrl)}`;
   return /* @__PURE__ */ jsxDEV(AbsoluteFill, { style: { backgroundColor: "#111" }, children: [
     /* @__PURE__ */ jsxDEV(
       OffthreadVideo,
@@ -27,7 +46,7 @@ const ReplayComposition = ({ src, user, score, qrCode }) => {
       false,
       {
         fileName: "<stdin>",
-        lineNumber: 23,
+        lineNumber: 43,
         columnNumber: 13
       }
     ),
@@ -57,14 +76,14 @@ const ReplayComposition = ({ src, user, score, qrCode }) => {
         false,
         {
           fileName: "<stdin>",
-          lineNumber: 43,
+          lineNumber: 63,
           columnNumber: 21
         }
       ),
       /* @__PURE__ */ jsxDEV("div", { style: { display: "flex", flexDirection: "column" }, children: [
         /* @__PURE__ */ jsxDEV("span", { style: { ...textStyle, position: "relative", fontSize: "32px" }, children: username }, void 0, false, {
           fileName: "<stdin>",
-          lineNumber: 54,
+          lineNumber: 74,
           columnNumber: 25
         }),
         /* @__PURE__ */ jsxDEV("span", { style: { ...textStyle, position: "relative", fontSize: "24px", opacity: 0.9 }, children: [
@@ -72,21 +91,21 @@ const ReplayComposition = ({ src, user, score, qrCode }) => {
           score
         ] }, void 0, true, {
           fileName: "<stdin>",
-          lineNumber: 55,
+          lineNumber: 75,
           columnNumber: 25
         })
       ] }, void 0, true, {
         fileName: "<stdin>",
-        lineNumber: 53,
+        lineNumber: 73,
         columnNumber: 21
       })
     ] }, void 0, true, {
       fileName: "<stdin>",
-      lineNumber: 42,
+      lineNumber: 62,
       columnNumber: 17
     }) }, void 0, false, {
       fileName: "<stdin>",
-      lineNumber: 33,
+      lineNumber: 53,
       columnNumber: 13
     }),
     /* @__PURE__ */ jsxDEV(AbsoluteFill, { style: {
@@ -119,7 +138,7 @@ const ReplayComposition = ({ src, user, score, qrCode }) => {
         false,
         {
           fileName: "<stdin>",
-          lineNumber: 82,
+          lineNumber: 102,
           columnNumber: 21
         }
       ),
@@ -130,21 +149,21 @@ const ReplayComposition = ({ src, user, score, qrCode }) => {
         textTransform: "uppercase"
       }, children: "Scan To Play" }, void 0, false, {
         fileName: "<stdin>",
-        lineNumber: 86,
+        lineNumber: 106,
         columnNumber: 21
       })
     ] }, void 0, true, {
       fileName: "<stdin>",
-      lineNumber: 72,
+      lineNumber: 92,
       columnNumber: 17
     }) }, void 0, false, {
       fileName: "<stdin>",
-      lineNumber: 61,
+      lineNumber: 81,
       columnNumber: 13
     })
   ] }, void 0, true, {
     fileName: "<stdin>",
-    lineNumber: 21,
+    lineNumber: 41,
     columnNumber: 9
   });
 };
@@ -179,13 +198,13 @@ function renderReplay(containerId, props) {
       false,
       {
         fileName: "<stdin>",
-        lineNumber: 116,
+        lineNumber: 136,
         columnNumber: 13
       },
       this
     ) }, void 0, false, {
       fileName: "<stdin>",
-      lineNumber: 115,
+      lineNumber: 135,
       columnNumber: 9
     }, this)
   );

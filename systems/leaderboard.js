@@ -29,7 +29,7 @@ function renderLocal() {
     const d = new Date(e.at);
     li.textContent = `${e.score} — ${d.toLocaleDateString()} ${d.toLocaleTimeString()} `;
     if (e.clipUrl) {
-      const meta = { src: e.clipUrl, user: (currentUser?.username)||'you', score: e.score };
+      const meta = { src: e.clipUrl, user: currentUser || 'Player', score: e.score };
       li.appendChild(createReplayButton(meta));
     }
     list.appendChild(li);
