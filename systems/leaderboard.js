@@ -210,9 +210,43 @@ function bindReplayModal() {
   closeBtn?.addEventListener('click', ()=> hideReplayModal());
   modal?.addEventListener('click', (e)=>{ if(e.target===modal) hideReplayModal(); });
 }
+
+// NEW: wire up the standalone replay download button
+function bindReplayDownload() {
+  const btn = document.getElementById('replay-download');
+  if (!btn) return;
+  // start disabled until a replay is opened
+  btn.disabled = true;
+  btn.addEventListener('click', () => {
+    if (!currentReplayMeta || !currentReplayMeta.src) return;
+    try {
+      const a = document.createElement('a');
+      a.href = currentReplayMeta.src;
+      const ts = new Date().toISOString().replace(/[:.]/g, '-');
+      const base = 'splashy_bear_replay';
+      const scorePart = typeof currentReplayMeta.score === 'number'
+        ? `_score-${currentReplayMeta.score}`
+        : '';
+      a.download = `${base}${scorePart}_${ts}.webm`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (e) {
+      console.warn('Replay download failed:', e);
+    }
+  });
+}
+
 function showReplayModal({ src, user, score }) {
   const modal = document.getElementById('replay-modal'); if (!modal) return;
   modal.classList.remove('hidden'); modal.setAttribute('aria-hidden','false');
+
+  // store meta for download button
+  currentReplayMeta = { src, user, score };
+  const dlBtn = document.getElementById('replay-download');
+  if (dlBtn) {
+    dlBtn.disabled = !src;
+  }
   
   import('./replayPlayer.jsx').then(({ renderReplay }) => {
     renderReplay('replay-container', { src, user, score });
@@ -222,6 +256,11 @@ function hideReplayModal() {
   const modal = document.getElementById('replay-modal');
   modal?.classList.add('hidden'); modal?.setAttribute('aria-hidden','true');
   
+  // clear current replay meta and disable download
+  currentReplayMeta = null;
+  const dlBtn = document.getElementById('replay-download');
+  if (dlBtn) dlBtn.disabled = true;
+
   import('./replayPlayer.jsx').then(({ unmountReplay }) => {
     unmountReplay();
   }).catch(() => {});
@@ -232,6 +271,7 @@ window.addEventListener('DOMContentLoaded', () => {
   bindTabs();
   bindPagination();
   bindReplayModal();
+  bindReplayDownload();
   renderLocal();
   // remove auto global subscribe on load
   // subscribeGlobal();
