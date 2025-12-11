@@ -3,7 +3,16 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { Player } from "@websim/remotion/player";
 import { AbsoluteFill, OffthreadVideo, Img } from "remotion";
-const ReplayComposition = ({ src, user, score, qrCode }) => {
+import QRCode from "https://esm.sh/qrcode";
+const ReplayComposition = ({ src, user, score }) => {
+  const [qrCodeData, setQrCodeData] = React.useState(null);
+  React.useEffect(() => {
+    QRCode.toDataURL("https://splashybear.on.websim.com/", {
+      width: 512,
+      margin: 0,
+      color: { dark: "#000000", light: "#ffffff" }
+    }).then((url) => setQrCodeData(url)).catch((err) => console.error("QR Generation failed:", err));
+  }, []);
   const textStyle = {
     fontFamily: "'Fredoka One', 'Arial', sans-serif",
     color: "white",
@@ -46,7 +55,7 @@ const ReplayComposition = ({ src, user, score, qrCode }) => {
       false,
       {
         fileName: "<stdin>",
-        lineNumber: 43,
+        lineNumber: 57,
         columnNumber: 13
       }
     ),
@@ -76,14 +85,14 @@ const ReplayComposition = ({ src, user, score, qrCode }) => {
         false,
         {
           fileName: "<stdin>",
-          lineNumber: 63,
+          lineNumber: 77,
           columnNumber: 21
         }
       ),
       /* @__PURE__ */ jsxDEV("div", { style: { display: "flex", flexDirection: "column" }, children: [
         /* @__PURE__ */ jsxDEV("span", { style: { ...textStyle, position: "relative", fontSize: "32px" }, children: username }, void 0, false, {
           fileName: "<stdin>",
-          lineNumber: 74,
+          lineNumber: 88,
           columnNumber: 25
         }),
         /* @__PURE__ */ jsxDEV("span", { style: { ...textStyle, position: "relative", fontSize: "24px", opacity: 0.9 }, children: [
@@ -91,21 +100,21 @@ const ReplayComposition = ({ src, user, score, qrCode }) => {
           score
         ] }, void 0, true, {
           fileName: "<stdin>",
-          lineNumber: 75,
+          lineNumber: 89,
           columnNumber: 25
         })
       ] }, void 0, true, {
         fileName: "<stdin>",
-        lineNumber: 73,
+        lineNumber: 87,
         columnNumber: 21
       })
     ] }, void 0, true, {
       fileName: "<stdin>",
-      lineNumber: 62,
+      lineNumber: 76,
       columnNumber: 17
     }) }, void 0, false, {
       fileName: "<stdin>",
-      lineNumber: 53,
+      lineNumber: 67,
       columnNumber: 13
     }),
     /* @__PURE__ */ jsxDEV(AbsoluteFill, { style: {
@@ -124,46 +133,52 @@ const ReplayComposition = ({ src, user, score, qrCode }) => {
       alignItems: "center",
       gap: "10px",
       backgroundColor: "white",
-      padding: "15px",
-      borderRadius: "15px",
-      boxShadow: "0 5px 15px rgba(0,0,0,0.3)"
+      padding: "20px",
+      borderRadius: "20px",
+      boxShadow: "0 8px 24px rgba(0,0,0,0.5)"
     }, children: [
-      /* @__PURE__ */ jsxDEV(
+      qrCodeData && /* @__PURE__ */ jsxDEV(
         Img,
         {
-          src: qrCode,
-          style: { width: "120px", height: "120px" }
+          src: qrCodeData,
+          style: {
+            width: "140px",
+            height: "140px",
+            imageRendering: "pixelated"
+          }
         },
         void 0,
         false,
         {
           fileName: "<stdin>",
-          lineNumber: 102,
-          columnNumber: 21
+          lineNumber: 116,
+          columnNumber: 36
         }
       ),
       /* @__PURE__ */ jsxDEV("span", { style: {
         fontFamily: "'Fredoka One', sans-serif",
         color: "black",
-        fontSize: "18px",
-        textTransform: "uppercase"
+        fontSize: "20px",
+        textTransform: "uppercase",
+        fontWeight: "bold",
+        letterSpacing: "1px"
       }, children: "Scan To Play" }, void 0, false, {
         fileName: "<stdin>",
-        lineNumber: 106,
+        lineNumber: 124,
         columnNumber: 21
       })
     ] }, void 0, true, {
       fileName: "<stdin>",
-      lineNumber: 92,
+      lineNumber: 106,
       columnNumber: 17
     }) }, void 0, false, {
       fileName: "<stdin>",
-      lineNumber: 81,
+      lineNumber: 95,
       columnNumber: 13
     })
   ] }, void 0, true, {
     fileName: "<stdin>",
-    lineNumber: 41,
+    lineNumber: 55,
     columnNumber: 9
   });
 };
@@ -184,11 +199,7 @@ function renderReplay(containerId, props) {
         fps: 30,
         compositionWidth: 540,
         compositionHeight: 960,
-        inputProps: {
-          ...props,
-          qrCode: "qr_code.png"
-          // Asset path
-        },
+        inputProps: props,
         loop: true,
         autoPlay: true,
         controls: true,
@@ -198,13 +209,13 @@ function renderReplay(containerId, props) {
       false,
       {
         fileName: "<stdin>",
-        lineNumber: 136,
+        lineNumber: 156,
         columnNumber: 13
       },
       this
     ) }, void 0, false, {
       fileName: "<stdin>",
-      lineNumber: 135,
+      lineNumber: 155,
       columnNumber: 9
     }, this)
   );
