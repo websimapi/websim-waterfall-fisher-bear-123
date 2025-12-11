@@ -2,6 +2,8 @@ const LS_KEY = 'sb_leaderboard_v1';
 let room = null;
 let currentUser = null;
 let myRecord = null;
+/** currently open replay meta for download button */
+let currentReplayMeta = null;
 const pageState = { tab: 'local', local: 0, global: 0 };
 const PAGE_SIZE = 8;
 
