@@ -220,10 +220,13 @@ function bindReplayDownload() {
   btn.addEventListener('click', async () => {
     if (!currentReplayMeta || !currentReplayMeta.src) return;
     try {
-      const mod = await import('./replayPlayer.jsx');
-      if (typeof mod.requestReplayDownload === 'function') {
-        mod.requestReplayDownload();
-      }
+      // Directly download the stored replay clip URL as a WebM file
+      const a = document.createElement('a');
+      a.href = currentReplayMeta.src;
+      a.download = `splashy-bear-replay-${currentReplayMeta.score || 'clip'}.webm`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     } catch (e) {
       console.warn('Replay download trigger failed:', e);
     }
