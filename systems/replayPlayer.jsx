@@ -4,7 +4,6 @@ import { createRoot } from "react-dom/client";
 import { Player } from "@websim/remotion/player";
 import { AbsoluteFill, OffthreadVideo, Img } from "remotion";
 import QRCode from "https://esm.sh/qrcode";
-let latestPlayerHandle = null;
 const ReplayComposition = ({ src, user, score }) => {
   const [qrCodeData, setQrCodeData] = React.useState(null);
   React.useEffect(() => {
@@ -56,7 +55,7 @@ const ReplayComposition = ({ src, user, score }) => {
       false,
       {
         fileName: "<stdin>",
-        lineNumber: 59,
+        lineNumber: 57,
         columnNumber: 13
       }
     ),
@@ -86,14 +85,14 @@ const ReplayComposition = ({ src, user, score }) => {
         false,
         {
           fileName: "<stdin>",
-          lineNumber: 79,
+          lineNumber: 77,
           columnNumber: 21
         }
       ),
       /* @__PURE__ */ jsxDEV("div", { style: { display: "flex", flexDirection: "column" }, children: [
         /* @__PURE__ */ jsxDEV("span", { style: { ...textStyle, position: "relative", fontSize: "32px" }, children: username }, void 0, false, {
           fileName: "<stdin>",
-          lineNumber: 90,
+          lineNumber: 88,
           columnNumber: 25
         }),
         /* @__PURE__ */ jsxDEV("span", { style: { ...textStyle, position: "relative", fontSize: "24px", opacity: 0.9 }, children: [
@@ -101,21 +100,21 @@ const ReplayComposition = ({ src, user, score }) => {
           score
         ] }, void 0, true, {
           fileName: "<stdin>",
-          lineNumber: 91,
+          lineNumber: 89,
           columnNumber: 25
         })
       ] }, void 0, true, {
         fileName: "<stdin>",
-        lineNumber: 89,
+        lineNumber: 87,
         columnNumber: 21
       })
     ] }, void 0, true, {
       fileName: "<stdin>",
-      lineNumber: 78,
+      lineNumber: 76,
       columnNumber: 17
     }) }, void 0, false, {
       fileName: "<stdin>",
-      lineNumber: 69,
+      lineNumber: 67,
       columnNumber: 13
     }),
     /* @__PURE__ */ jsxDEV(AbsoluteFill, { style: {
@@ -152,7 +151,7 @@ const ReplayComposition = ({ src, user, score }) => {
         false,
         {
           fileName: "<stdin>",
-          lineNumber: 118,
+          lineNumber: 116,
           columnNumber: 36
         }
       ),
@@ -165,48 +164,39 @@ const ReplayComposition = ({ src, user, score }) => {
         letterSpacing: "1px"
       }, children: "Scan To Play" }, void 0, false, {
         fileName: "<stdin>",
-        lineNumber: 126,
+        lineNumber: 124,
         columnNumber: 21
       })
     ] }, void 0, true, {
       fileName: "<stdin>",
-      lineNumber: 108,
+      lineNumber: 106,
       columnNumber: 17
     }) }, void 0, false, {
       fileName: "<stdin>",
-      lineNumber: 97,
+      lineNumber: 95,
       columnNumber: 13
     })
   ] }, void 0, true, {
     fileName: "<stdin>",
-    lineNumber: 57,
+    lineNumber: 55,
     columnNumber: 9
   });
 };
 let reactRoot = null;
 let mounted = false;
+let currentReplayContainerId = null;
 function renderReplay(containerId, props) {
   const container = document.getElementById(containerId);
   if (!container) return;
   if (!reactRoot) {
     reactRoot = createRoot(container);
   }
+  currentReplayContainerId = containerId;
   const durationInFrames = 30 * 15;
   const WrappedPlayer = () => {
-    const playerRef = React.useRef(null);
-    React.useEffect(() => {
-      latestPlayerHandle = playerRef.current || null;
-      mounted = true;
-      return () => {
-        if (mounted && latestPlayerHandle === playerRef.current) {
-          latestPlayerHandle = null;
-        }
-      };
-    }, []);
     return /* @__PURE__ */ jsxDEV("div", { style: { width: "100%", height: "100%" }, children: /* @__PURE__ */ jsxDEV(
       Player,
       {
-        ref: playerRef,
         component: ReplayComposition,
         durationInFrames,
         fps: 30,
@@ -215,33 +205,40 @@ function renderReplay(containerId, props) {
         inputProps: props,
         loop: true,
         autoPlay: true,
-        controls: false,
+        controls: true,
         style: { width: "100%", height: "100%" }
       },
       void 0,
       false,
       {
         fileName: "<stdin>",
-        lineNumber: 171,
+        lineNumber: 161,
         columnNumber: 17
       },
       this
     ) }, void 0, false, {
       fileName: "<stdin>",
-      lineNumber: 170,
+      lineNumber: 160,
       columnNumber: 13
     }, this);
   };
   reactRoot.render(/* @__PURE__ */ jsxDEV(WrappedPlayer, {}, void 0, false, {
     fileName: "<stdin>",
-    lineNumber: 188,
+    lineNumber: 177,
     columnNumber: 22
   }, this));
+  mounted = true;
 }
 function requestReplayDownload() {
   try {
-    if (latestPlayerHandle && typeof latestPlayerHandle.downloadVideo === "function") {
-      latestPlayerHandle.downloadVideo();
+    if (!currentReplayContainerId) return;
+    const container = document.getElementById(currentReplayContainerId);
+    if (!container) return;
+    const downloadBtn = container.querySelector('button[aria-label*="ownload"]') || container.querySelector('button[title*="ownload"]');
+    if (downloadBtn) {
+      downloadBtn.click();
+    } else {
+      console.warn("Download button not found in Remotion Player controls.");
     }
   } catch (e) {
     console.warn("Failed to trigger replay download:", e);
@@ -251,8 +248,8 @@ function unmountReplay() {
   if (reactRoot) {
     reactRoot.unmount();
     reactRoot = null;
-    latestPlayerHandle = null;
     mounted = false;
+    currentReplayContainerId = null;
   }
 }
 export {
