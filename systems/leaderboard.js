@@ -267,22 +267,19 @@ async function generateReplayQR(imgEl) {
 }
 
 /**
- * Render a native HTML5 video with overlays for username, score and QR.
- * Layout is constrained to a vertical "short" style inside the replay card.
+ * Render a native HTML5 video.
+ * Overlays are now burned into the video file by the recorder.
  */
-function renderNativeReplay({ src, user, score }) {
+function renderNativeReplay({ src }) {
   const container = document.getElementById('replay-container');
   if (!container) return;
   container.innerHTML = '';
 
-  const { username, avatarUrl } = getReplayUserMeta(user);
-
   const wrap = document.createElement('div');
   wrap.className = 'replay-native';
-
-  const aspect = document.createElement('div');
-  aspect.className = 'replay-aspect';
-  wrap.appendChild(aspect);
+  wrap.style.display = 'flex';
+  wrap.style.justifyContent = 'center';
+  wrap.style.background = '#000';
 
   const video = document.createElement('video');
   video.id = 'replay-video';
@@ -292,56 +289,12 @@ function renderNativeReplay({ src, user, score }) {
   video.controls = true;
   video.muted = false;
   video.autoplay = true;
-  aspect.appendChild(video);
-
-  // Bottom-left: avatar + username + score
-  const bl = document.createElement('div');
-  bl.className = 'replay-overlay bl';
-
-  const avatar = document.createElement('img');
-  avatar.className = 'replay-avatar';
-  avatar.src = avatarUrl;
-  avatar.alt = `${username} avatar`;
-  bl.appendChild(avatar);
-
-  const metaBox = document.createElement('div');
-  metaBox.className = 'replay-meta';
-  const nameSpan = document.createElement('span');
-  nameSpan.className = 'replay-username';
-  nameSpan.textContent = username;
-  const scoreSpan = document.createElement('span');
-  scoreSpan.className = 'replay-score';
-  scoreSpan.textContent = `Score: ${score}`;
-  metaBox.appendChild(nameSpan);
-  metaBox.appendChild(scoreSpan);
-  bl.appendChild(metaBox);
-
-  aspect.appendChild(bl);
-
-  // Bottom-right: QR card
-  const br = document.createElement('div');
-  br.className = 'replay-overlay br';
-
-  const qrCard = document.createElement('div');
-  qrCard.className = 'replay-qr';
-
-  const qrImg = document.createElement('img');
-  qrImg.className = 'replay-qr-img';
-  qrImg.alt = 'Scan to play';
-  qrCard.appendChild(qrImg);
-
-  const qrLabel = document.createElement('span');
-  qrLabel.className = 'replay-qr-label';
-  qrLabel.textContent = 'Scan to play';
-  qrCard.appendChild(qrLabel);
-
-  br.appendChild(qrCard);
-  aspect.appendChild(br);
-
+  video.style.maxHeight = '100%';
+  video.style.maxWidth = '100%';
+  video.style.aspectRatio = '9/16';
+  
+  wrap.appendChild(video);
   container.appendChild(wrap);
-
-  // Kick off QR generation
-  generateReplayQR(qrImg);
 }
 
  // NEW: wire up the standalone replay download button

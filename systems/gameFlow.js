@@ -88,7 +88,7 @@ function startGame() {
     if (showcaseBear) showcaseBear.visible = false;
 
     createGameBear();
-    try { startRecording(renderer.domElement); } catch {}
+    try { startRecording(renderer.domElement, () => ({ score: gameState.score })); } catch (e) { console.error(e); }
     // notify listeners that gameplay has begun (for quick-start drag carry-over)
     window.dispatchEvent(new CustomEvent('game:started'));
 

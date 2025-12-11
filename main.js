@@ -5,6 +5,7 @@ import { createWaterfall, updateWaterfall } from './entities/waterfall.js';
 import { initControls } from './systems/controls.js';
 import { initGame, updateGame } from './systems/game.js';
 import { initDevTools } from './systems/dev.js';
+import { initRecorder, tickRecorder } from './systems/recorder.js';
 import * as TWEEN from 'tween';
 import { getPlayerProgress } from './unlocks.js';
 import { startGameWithTurnaround } from './systems/gameFlow.js';
@@ -19,6 +20,7 @@ createLights(scene);
 
 // --- INITIALIZE SYSTEMS ---
 initDevTools(scene);
+initRecorder();
 initGame();
 initControls(scene, camera);
 
@@ -56,6 +58,7 @@ function animate() {
     updateWaterfall(waterfall);
 
     renderer.render(scene, camera);
+    tickRecorder();
 }
 
 // Start the animation loop
